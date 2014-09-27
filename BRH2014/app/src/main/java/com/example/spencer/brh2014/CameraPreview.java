@@ -69,7 +69,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     private FullFrameRect mOverlay;
 
     private int overlayTexture;
-    private int nextOverlayTexture;
+    private AsyncTask nextOverlayBitmap;
+    private boolean showOverlay = false;
 
     public CameraPreview(Context context, Camera camera) {
         super(context);
@@ -107,14 +108,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, overlayTexture);
 
-        AsyncTask t = ((new DownloadImageTask()).execute("https://i.imgur.com/BSlyvcN.jpg"));
-        try {
-            GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, (Bitmap)(t.get()), 0);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
+        nextOverlayBitmap = ((new DownloadImageTask()).execute("https://i.imgur.com/BSlyvcN.jpg"));
 
         //byte[] mRGBA = {-127,0,0,-127,   0,-127,0,-127,   0,0,-127,-127,   0,0,0,-127};
         //GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, 2, 2, 0, GLES20.GL_RGBA,
@@ -127,7 +121,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
                 GLES20.GL_CLAMP_TO_EDGE);
         GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T,
                 GLES20.GL_CLAMP_TO_EDGE);
-        GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);
+
 
         Log.d(TAG, "starting camera preview");
         try {
@@ -149,7 +143,24 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         drawFrame();
     }
 
+    private void updateOverlayTexture(){
+        if(nextOverlayBitmap != null && nextOverlayBitmap.getStatus() == AsyncTask.Status.FINISHED) {
+            try {
+                GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, (Bitmap) (nextOverlayBitmap.get()), 0);
+                GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);
+                showOverlay = true;
+                nextOverlayBitmap = null;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     private void drawFrame() {
+
+        updateOverlayTexture();
 
         // Latch the next frame from the camera.
         mDisplaySurface.makeCurrent();
@@ -163,10 +174,16 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         GLES20.glViewport(0, 0, viewWidth, viewHeight);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
         GLES20.glViewport(0, 0, viewWidth / 2, viewHeight);
+
         mFullFrameBlit.drawFrame(mTextureId, mTmpMatrix);
+        if(showOverlay)
+            mOverlay.drawFrame(overlayTexture, mTmpMatrix);
+
         GLES20.glViewport(viewWidth / 2, 0, viewWidth, viewHeight);
         mFullFrameBlit.drawFrame(mTextureId, mTmpMatrix);
-        mOverlay.drawFrame(overlayTexture, mTmpMatrix);
+        if(showOverlay)
+            mOverlay.drawFrame(overlayTexture, mTmpMatrix);
+
         mDisplaySurface.swapBuffers();
 
         mFrameNum++;
