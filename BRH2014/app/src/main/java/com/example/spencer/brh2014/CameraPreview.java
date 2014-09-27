@@ -103,7 +103,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         mFrameNum++;
     }
 
-    private void takePicture() {
+    public void takePicture() {
         mCamera.takePicture(null, null, new Camera.PictureCallback() {
             @Override
             public void onPictureTaken(byte[] bytes, Camera camera) {
