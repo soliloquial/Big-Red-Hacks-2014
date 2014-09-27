@@ -48,7 +48,7 @@ public class Translation {
 	    JSONObject o = translations.getJSONObject(i);
 	    Translation t = new Translation();
 	    t.english = o.getString("original");
-	    t.translation = o.getString("translation");
+	    t.translation = o.getString("translated");
 	    t.imageUrl = new URL(o.getString("imageUrl"));
 	    list.add(t);
 	}	
