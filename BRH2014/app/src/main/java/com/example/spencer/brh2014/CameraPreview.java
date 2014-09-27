@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.opengl.GLES20;
+import android.os.Environment;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -14,7 +15,12 @@ import com.example.spencer.brh2014.gles.FullFrameRect;
 import com.example.spencer.brh2014.gles.Texture2dProgram;
 import com.example.spencer.brh2014.gles.WindowSurface;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /** A basic Camera preview class */
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback, SurfaceTexture.OnFrameAvailableListener {
@@ -95,5 +101,46 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         mDisplaySurface.swapBuffers();
 
         mFrameNum++;
+    }
+
+    private void takePicture() {
+        mCamera.takePicture(null, null, new Camera.PictureCallback() {
+            @Override
+            public void onPictureTaken(byte[] bytes, Camera camera) {
+                File pictureFile = getOutputMediaFile();
+                if (pictureFile == null) {
+                    return;
+                }
+                try {
+                    FileOutputStream fos = new FileOutputStream(pictureFile);
+                    fos.write(bytes);
+                    fos.close();
+                } catch (FileNotFoundException e) {
+
+                } catch (IOException e) {
+                }
+            }
+        });
+    }
+
+    private static File getOutputMediaFile() {
+        File mediaStorageDir = new File(
+                Environment
+                        .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                "MyCameraApp");
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
+                Log.d("MyCameraApp", "failed to create directory");
+                return null;
+            }
+        }
+        // Create a media file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss")
+                .format(new Date());
+        File mediaFile;
+        mediaFile = new File(mediaStorageDir.getPath() + File.separator
+                + "IMG_" + timeStamp + ".jpg");
+
+        return mediaFile;
     }
 }
