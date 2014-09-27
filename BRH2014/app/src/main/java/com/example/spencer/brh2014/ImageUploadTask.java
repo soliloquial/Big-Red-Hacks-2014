@@ -45,12 +45,12 @@ public abstract class ImageUploadTask extends AsyncTask<Void, Void, String> {
 
             if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 responseIn = conn.getInputStream();
-                return onInput(responseIn);
+                return "http://i.imgur.com/" + onInput(responseIn) + ".jpg";
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "error";
+        return "http://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/Coca-Cola_logo.svg/800px-Coca-Cola_logo.svg.png";
     }
 
     protected String onInput(InputStream in) throws Exception {

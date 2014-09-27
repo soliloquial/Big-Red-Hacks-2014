@@ -21,8 +21,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 /** A basic Camera preview class */
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback, SurfaceTexture.OnFrameAvailableListener {
@@ -36,6 +39,9 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     private EglSurfaceBase mDisplaySurface;
     private EglCore mEglCore;
     private FullFrameRect mFullFrameBlit;
+    private List<Translation> currList;
+    private int currIndex;
+    private boolean reviewMode;
 
     public CameraPreview(Context context, Camera camera) {
         super(context);
@@ -125,8 +131,12 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
                 }
                 new ImageUploadTask(bytes) {
                     @Override
-                    protected void onPostExecute(String s) {
-                        Log.d("NOTICE", "image uploaded as "+s);
+                    protected void onPostExecute(String imageUrl) {
+                        try {
+                            Translation.doTranslate("de", new URL(imageUrl));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 }.execute();
                 camera.startPreview();

@@ -19,8 +19,8 @@ public class Translation {
 
     private static final String TRANSLATE_URL = "";
 
-    private static URL makeTranslateUrl(String languageCode, URL imageURL) {
-	return new URL(TRANSLATE_URL + "?lang=" + languageCode + "&url=" +
+    private static URL makeTranslateUrl(String languageCode, URL imageURL) throws Exception {
+	    return new URL(TRANSLATE_URL + "?lang=" + languageCode + "&url=" +
 		       imageURL);
     }
 
