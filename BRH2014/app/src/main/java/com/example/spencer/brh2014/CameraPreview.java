@@ -2,10 +2,7 @@ package com.example.spencer.brh2014;
 
 import android.app.Activity;
 import android.content.Context;
-<<<<<<< Updated upstream
 import android.content.Intent;
-=======
->>>>>>> Stashed changes
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
@@ -30,7 +27,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-<<<<<<< Updated upstream
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
@@ -44,7 +40,6 @@ import java.nio.CharBuffer;
 import java.nio.FloatBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-=======
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -53,7 +48,6 @@ import java.nio.CharBuffer;
 import java.nio.FloatBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
->>>>>>> Stashed changes
 import java.util.concurrent.ExecutionException;
 
 /** A basic Camera preview class */
@@ -71,11 +65,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     private List<Translation> currList;
     private int currIndex;
     private boolean reviewMode;
-
-    private FullFrameRect mOverlay;
-
-    private int overlayTexture;
-    private int nextOverlayTexture;
 
     private FullFrameRect mOverlay;
 
