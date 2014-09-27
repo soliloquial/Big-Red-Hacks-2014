@@ -1,5 +1,8 @@
 package com.example.spencer.brh2014;
 
+import com.example.spencer.brh2014.ShakeDetector;
+import com.example.spencer.brh2014.ShakeDetector.OnShakeListener;
+
 import android.app.Activity;
 import android.hardware.Camera;
 import android.os.Bundle;
@@ -8,12 +11,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.Toast;
+import com.example.spencer.brh2014.ShakeDetector.OnShakeListener;
 
 
-public class Main extends Activity {
+public class Main extends Activity implements OnShakeListener {
 
     private Camera mCamera;
     private CameraPreview mPreview;
+    private ShakeDetector shakeDetector;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -22,6 +28,9 @@ public class Main extends Activity {
 
         // Create an instance of Camera
         mCamera = getCameraInstance();
+        
+       // Create a shake detector
+     	shakeDetector = new ShakeDetector(this);
 
         // Create our Preview view and set it as the content of our activity.
         mPreview = new CameraPreview(this, mCamera);
@@ -66,4 +75,9 @@ public class Main extends Activity {
         }
         return c; // returns null if camera is unavailable
     }
+    
+    @Override
+	public void onShake() {
+		Toast.makeText(this, "shake detected", Toast.LENGTH_SHORT).show();
+	}
 }
