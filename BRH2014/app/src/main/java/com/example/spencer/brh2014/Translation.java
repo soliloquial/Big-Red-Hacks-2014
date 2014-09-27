@@ -17,7 +17,7 @@ public class Translation {
     public URL imageUrl;
     public String translation;
 
-    private static final String TRANSLATE_URL = "";
+    private static final String TRANSLATE_URL = "http://10.144.19.178/api.php";
 
     private static URL makeTranslateUrl(String languageCode, URL imageURL) throws Exception {
 	    return new URL(TRANSLATE_URL + "?lang=" + languageCode + "&url=" +
@@ -47,7 +47,7 @@ public class Translation {
 	for (int i = 0; i < translations.length(); ++i) {
 	    JSONObject o = translations.getJSONObject(i);
 	    Translation t = new Translation();
-	    t.english = o.getString("original");
+	    t.english = o.getString("name");
 	    t.translation = o.getString("translated");
 	    t.imageUrl = new URL(o.getString("imageUrl"));
 	    list.add(t);

@@ -64,7 +64,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     private FullFrameRect mFullFrameBlit;
     private List<Translation> currList;
     private int currIndex;
-    private boolean reviewMode;
+    private boolean reviewMode = false;
 
     private FullFrameRect mOverlay;
 
@@ -178,26 +178,16 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         mCamera.takePicture(null, null, new Camera.PictureCallback() {
             @Override
             public void onPictureTaken(byte[] bytes, Camera camera) {
-                File pictureFile = getOutputMediaFile();
-                if (pictureFile == null) {
-                    return;
-                }
-                try {
-                    FileOutputStream fos = new FileOutputStream(pictureFile);
-                    fos.write(bytes);
-                    fos.close();
-                } catch (FileNotFoundException e) {
-
-                } catch (IOException e) {
-                }
                 new ImageUploadTask(bytes) {
                     @Override
                     protected void onPostExecute(String imageUrl) {
-                        try {
-                            Translation.doTranslate("de", new URL(imageUrl));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                        new TranslationTask("de", imageUrl) {
+                            @Override protected void onPostExecute(List<Translation> l) {
+                                currList = l;
+                                reviewMode = true;
+                                currIndex = 0;
+                            }
+                        }.execute();
                     }
                 }.execute();
                 camera.startPreview();
