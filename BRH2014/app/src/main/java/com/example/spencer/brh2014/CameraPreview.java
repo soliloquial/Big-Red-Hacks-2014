@@ -1,6 +1,8 @@
 package com.example.spencer.brh2014;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.opengl.GLES20;
@@ -103,7 +105,9 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         mFrameNum++;
     }
 
-    public void takePicture() {
+    public void takePicture(Activity mainScreen) {
+        Log.d("NOTICE", "Taking and uploading picture");
+        final Activity mainScreen2 = mainScreen;
         mCamera.takePicture(null, null, new Camera.PictureCallback() {
             @Override
             public void onPictureTaken(byte[] bytes, Camera camera) {
@@ -119,6 +123,13 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
                 } catch (IOException e) {
                 }
+                new ImageUploadTask(bytes) {
+                    @Override
+                    protected void onPostExecute(String s) {
+                        Log.d("NOTICE", "image uploaded as "+s);
+                    }
+                }.execute();
+                camera.startPreview();
             }
         });
     }
@@ -127,10 +138,10 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         File mediaStorageDir = new File(
                 Environment
                         .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-                "MyCameraApp");
+                "Lingo");
         if (!mediaStorageDir.exists()) {
             if (!mediaStorageDir.mkdirs()) {
-                Log.d("MyCameraApp", "failed to create directory");
+                Log.d("Lingo", "failed to create directory");
                 return null;
             }
         }

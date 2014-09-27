@@ -30,7 +30,7 @@ public class Main extends Activity {
         mPreview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mPreview.takePicture();
+                mPreview.takePicture(Main.this);
             }
         });
     }
