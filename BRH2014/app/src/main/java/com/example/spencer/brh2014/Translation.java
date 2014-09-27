@@ -19,9 +19,10 @@ public class Translation {
 
     private static final String TRANSLATE_URL = "";
 
-    private static URL makeTranslateUrl(String languageCode, URL imageURL) {
+    private static URL makeTranslateUrl(String languageCode, URL imageURL)
+	throws Exception {
 	return new URL(TRANSLATE_URL + "?lang=" + languageCode + "&url=" +
-		       imageURL);
+		       URLEncoder.encode(imageURL));
     }
 
     public static List<Translation> doTranslate(String languageCode,
@@ -48,7 +49,7 @@ public class Translation {
 	    JSONObject o = translations.getJSONObject(i);
 	    Translation t = new Translation();
 	    t.english = o.getString("original");
-	    t.translation = o.getString("translation");
+	    t.translation = o.getString("translated");
 	    t.imageUrl = new URL(o.getString("imageUrl"));
 	    list.add(t);
 	}	
