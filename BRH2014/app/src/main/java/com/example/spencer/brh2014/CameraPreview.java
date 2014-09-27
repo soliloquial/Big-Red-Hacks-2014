@@ -2,11 +2,20 @@ package com.example.spencer.brh2014;
 
 import android.app.Activity;
 import android.content.Context;
+<<<<<<< Updated upstream
 import android.content.Intent;
+=======
+>>>>>>> Stashed changes
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
+import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
+import android.opengl.GLUtils;
+import android.os.AsyncTask;
 import android.os.Environment;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -21,11 +30,31 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+<<<<<<< Updated upstream
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.FloatBuffer;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+=======
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.FloatBuffer;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+>>>>>>> Stashed changes
+import java.util.concurrent.ExecutionException;
 
 /** A basic Camera preview class */
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback, SurfaceTexture.OnFrameAvailableListener {
@@ -42,6 +71,16 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     private List<Translation> currList;
     private int currIndex;
     private boolean reviewMode;
+
+    private FullFrameRect mOverlay;
+
+    private int overlayTexture;
+    private int nextOverlayTexture;
+
+    private FullFrameRect mOverlay;
+
+    private int overlayTexture;
+    private int nextOverlayTexture;
 
     public CameraPreview(Context context, Camera camera) {
         super(context);
@@ -70,7 +109,37 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         mTextureId = mFullFrameBlit.createTextureObject();
         mTexture = new SurfaceTexture(mTextureId);
         mTexture.setOnFrameAvailableListener(this);
-        drawFrame();
+
+        mOverlay = new FullFrameRect(
+                new Texture2dProgram(Texture2dProgram.ProgramType.TEXTURE_OVERLAY));
+
+        overlayTexture = mOverlay.createTextureObject();
+//        nextOverlayTexture = mOverlay.createTextureObject();
+
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, overlayTexture);
+
+        AsyncTask t = ((new DownloadImageTask()).execute("https://i.imgur.com/BSlyvcN.jpg"));
+        try {
+            GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, (Bitmap)(t.get()), 0);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        //byte[] mRGBA = {-127,0,0,-127,   0,-127,0,-127,   0,0,-127,-127,   0,0,0,-127};
+        //GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, 2, 2, 0, GLES20.GL_RGBA,
+        //        GLES20.GL_UNSIGNED_BYTE, ByteBuffer.wrap(mRGBA));
+        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER,
+                GLES20.GL_LINEAR_MIPMAP_LINEAR);
+        GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER,
+                GLES20.GL_LINEAR);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S,
+                GLES20.GL_CLAMP_TO_EDGE);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T,
+                GLES20.GL_CLAMP_TO_EDGE);
+        GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);
+
         Log.d(TAG, "starting camera preview");
         try {
             mCamera.setPreviewTexture(mTexture);
@@ -88,7 +157,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     }
 
     public void onFrameAvailable(SurfaceTexture surfaceTexture) {
-        Log.d(TAG, "frame available");
         drawFrame();
     }
 
@@ -102,10 +170,14 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         // Fill the SurfaceView with it.
         int viewWidth = this.getWidth();
         int viewHeight = this.getHeight();
+        GLES20.glClearColor(0.5f, 0.0f, 0.0f, 1.0f);
         GLES20.glViewport(0, 0, viewWidth, viewHeight);
-        GLES20.glClearColor(1,0,0,1);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+        GLES20.glViewport(0, 0, viewWidth / 2, viewHeight);
         mFullFrameBlit.drawFrame(mTextureId, mTmpMatrix);
+        GLES20.glViewport(viewWidth / 2, 0, viewWidth, viewHeight);
+        mFullFrameBlit.drawFrame(mTextureId, mTmpMatrix);
+        mOverlay.drawFrame(overlayTexture, mTmpMatrix);
         mDisplaySurface.swapBuffers();
 
         mFrameNum++;

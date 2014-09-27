@@ -29,10 +29,10 @@ public class Texture2dProgram {
     private static final String TAG = GlUtil.TAG;
 
     public enum ProgramType {
-        TEXTURE_2D, TEXTURE_EXT, TEXTURE_EXT_BW, TEXTURE_EXT_FILT
+        TEXTURE_2D, TEXTURE_EXT, TEXTURE_OVERLAY, TEXTURE_EXT_BW, TEXTURE_EXT_FILT
     }
 
-    // Simple vertex shader, used for all programs.
+    // Simple vertex shader, used for all programs (except overlay)
     private static final String VERTEX_SHADER =
             "uniform mat4 uMVPMatrix;\n" +
             "uniform mat4 uTexMatrix;\n" +
@@ -43,6 +43,18 @@ public class Texture2dProgram {
             "    gl_Position = uMVPMatrix * aPosition;\n" +
             "    vTextureCoord = (uTexMatrix * aTextureCoord).xy;\n" +
             "}\n";
+
+    // Simple vertex shader for overlay.
+    private static final String VERTEX_SHADER_OVERLAY =
+            "uniform mat4 uMVPMatrix;\n" +
+                    "uniform mat4 uTexMatrix;\n" +
+                    "attribute vec4 aPosition;\n" +
+                    "attribute vec4 aTextureCoord;\n" +
+                    "varying vec2 vTextureCoord;\n" +
+                    "void main() {\n" +
+                    "    gl_Position = uMVPMatrix * aPosition;\n" +
+                    "    vTextureCoord = (uTexMatrix * aTextureCoord).xy;\n" +
+                    "}\n";
 
     // Simple fragment shader for use with "normal" 2D textures.
     private static final String FRAGMENT_SHADER_2D =
@@ -62,8 +74,19 @@ public class Texture2dProgram {
             "uniform samplerExternalOES sTexture;\n" +
             "void main() {\n" +
             "    mat4 m = mat4(0.566,0.433,0,0,    0.558,0.442,0,0,    0,0.242,0.758,0,    0,0,0,1);\n" +
-            "    gl_FragColor = texture2D(sTexture, fract(vTextureCoord * vec2(2.0,1.0)));\n" +
+            "    gl_FragColor = texture2D(sTexture, vTextureCoord);\n" +
             "}\n";
+
+    // Simple fragment shader for overlaying images
+    // SurfaceTexture).
+    private static final String FRAGMENT_SHADER_OVERLAY =
+            "#extension GL_OES_EGL_image_external : require\n" +
+                    "precision mediump float;\n" +
+                    "varying vec2 vTextureCoord;\n" +
+                    "uniform sampler2D sTexture;\n" +
+                    "void main() {\n" +
+                    "    gl_FragColor = texture2D(sTexture, fract(vTextureCoord * vec2(2.0,1.0)));\n" +
+                    "}\n";
 
     // Fragment shader that converts color to black & white with a simple transformation.
     private static final String FRAGMENT_SHADER_EXT_BW =
@@ -147,6 +170,10 @@ public class Texture2dProgram {
             case TEXTURE_EXT:
                 mTextureTarget = GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
                 mProgramHandle = GlUtil.createProgram(VERTEX_SHADER, FRAGMENT_SHADER_EXT);
+                break;
+            case TEXTURE_OVERLAY:
+                mTextureTarget = GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
+                mProgramHandle = GlUtil.createProgram(VERTEX_SHADER_OVERLAY, FRAGMENT_SHADER_OVERLAY);
                 break;
             case TEXTURE_EXT_BW:
                 mTextureTarget = GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
