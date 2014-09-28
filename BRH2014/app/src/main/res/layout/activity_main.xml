@@ -10,7 +10,7 @@
     tools:context=".Main">
 
     <LinearLayout
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         >
@@ -20,6 +20,31 @@
             android:layout_height="fill_parent"
             android:layout_weight="1"
             />
+    </LinearLayout>
+
+    <LinearLayout android:orientation="horizontal" android:layout_height="fill_parent" android:layout_width="fill_parent">
+        <LinearLayout android:layout_weight="1" android:layout_height="fill_parent" android:layout_width="fill_parent">
+            <TextView
+                android:id="@+id/textview"
+                android:text=""
+                android:textColor="#000"
+                android:textSize="30dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="90dp" />
+        </LinearLayout>
+        <LinearLayout android:layout_weight="1" android:layout_height="fill_parent" android:layout_width="fill_parent">
+            <TextView
+                android:id="@+id/textview2"
+                android:text=""
+                android:textColor="#000"
+                android:textSize="30dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="90dp" />
+        </LinearLayout>
     </LinearLayout>
 
 </RelativeLayout>

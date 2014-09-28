@@ -16,12 +16,16 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.spencer.brh2014.gles.EglCore;
 import com.example.spencer.brh2014.gles.EglSurfaceBase;
 import com.example.spencer.brh2014.gles.FullFrameRect;
 import com.example.spencer.brh2014.gles.Texture2dProgram;
 import com.example.spencer.brh2014.gles.WindowSurface;
+
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -71,10 +75,18 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     private int overlayTexture;
     private AsyncTask nextOverlayBitmap;
     private boolean showOverlay = false;
+    private Context mCxt;
+    private boolean translating;
+    private TextView captionTextView1;
+    private TextView captionTextView2;
 
-    public CameraPreview(Context context, Camera camera) {
+    public CameraPreview(Context context, Camera camera, TextView captionTextView1, TextView captionTextView2) {
         super(context);
         mCamera = camera;
+        mCxt = context;
+        this.captionTextView1 = captionTextView1;
+        this.captionTextView2 = captionTextView2;
+
 
         mHolder = getHolder();
         mHolder.addCallback(this);
@@ -107,8 +119,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 //        nextOverlayTexture = mOverlay.createTextureObject();
 
         GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, overlayTexture);
-
-        nextOverlayBitmap = ((new DownloadImageTask()).execute("https://i.imgur.com/BSlyvcN.jpg"));
 
         //byte[] mRGBA = {-127,0,0,-127,   0,-127,0,-127,   0,0,-127,-127,   0,0,0,-127};
         //GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_RGBA, 2, 2, 0, GLES20.GL_RGBA,
@@ -144,6 +154,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     }
 
     private void updateOverlayTexture(){
+
         if(nextOverlayBitmap != null && nextOverlayBitmap.getStatus() == AsyncTask.Status.FINISHED) {
             try {
                 GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, (Bitmap) (nextOverlayBitmap.get()), 0);
@@ -160,6 +171,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
     private void drawFrame() {
 
+
         updateOverlayTexture();
 
         // Latch the next frame from the camera.
@@ -173,7 +185,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         GLES20.glClearColor(0.5f, 0.0f, 0.0f, 1.0f);
         GLES20.glViewport(0, 0, viewWidth, viewHeight);
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
-        GLES20.glViewport(0, 0, viewWidth / 2, viewHeight);
+        GLES20.glViewport(0, 0, viewWidth, viewHeight);
 
         mFullFrameBlit.drawFrame(mTextureId, mTmpMatrix);
         if(showOverlay)
@@ -191,7 +203,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
     public void takePicture(Activity mainScreen) {
         Log.d("NOTICE", "Taking and uploading picture");
-        final Activity mainScreen2 = mainScreen;
         mCamera.takePicture(null, null, new Camera.PictureCallback() {
             @Override
             public void onPictureTaken(byte[] bytes, Camera camera) {
@@ -200,9 +211,17 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
                     protected void onPostExecute(String imageUrl) {
                         new TranslationTask("de", imageUrl) {
                             @Override protected void onPostExecute(List<Translation> l) {
+                                translating = false;
+                                if(l.size() == 0) {
+                                    Log.d("ERROR", "size is zero");
+                                    (Toast.makeText(mCxt,"No matches found", Toast.LENGTH_LONG)).show();
+                                    return;
+                                }
                                 currList = l;
                                 reviewMode = true;
                                 currIndex = 0;
+                                setCaption(currList.get(currIndex).translation);
+                                nextOverlayBitmap = ((new DownloadImageTask()).execute(l.get(currIndex).imageUrl.toString()));
                             }
                         }.execute();
                     }
@@ -231,5 +250,32 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
                 + "IMG_" + timeStamp + ".jpg");
 
         return mediaFile;
+    }
+
+    public void handleClick(Activity mainScreen) {
+        if(!showOverlay && !translating) {
+            translating = true;
+            takePicture(mainScreen);
+            (Toast.makeText(mCxt, "Translating (this may take some time)...", Toast.LENGTH_LONG)).show();
+        }
+        else {
+            nextImage();
+        }
+    }
+
+    private void nextImage() {
+        currIndex++;
+        if(currList == null || currIndex >= currList.size()) {
+            showOverlay = false;
+            return;
+        } else {
+            setCaption(currList.get(currIndex).translation);
+        }
+        nextOverlayBitmap = ((new DownloadImageTask()).execute(currList.get(currIndex).imageUrl.toString()));
+    }
+
+    private void setCaption(String text) {
+        this.captionTextView1.setText(text);
+        this.captionTextView2.setText(text);
     }
 }

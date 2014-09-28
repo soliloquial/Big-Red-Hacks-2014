@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.example.spencer.brh2014.ShakeDetector.OnShakeListener;
 
@@ -33,13 +34,13 @@ public class Main extends Activity implements OnShakeListener {
      	shakeDetector = new ShakeDetector(this);
 
         // Create our Preview view and set it as the content of our activity.
-        mPreview = new CameraPreview(this, mCamera);
+        mPreview = new CameraPreview(this, mCamera, (TextView) findViewById(R.id.textview), (TextView) findViewById(R.id.textview2));
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
         preview.addView(mPreview);
         mPreview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mPreview.takePicture(Main.this);
+                mPreview.handleClick(Main.this);
             }
         });
     }
