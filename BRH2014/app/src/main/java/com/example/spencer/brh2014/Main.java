@@ -21,6 +21,7 @@ public class Main extends Activity implements OnShakeListener {
     private Camera mCamera;
     private CameraPreview mPreview;
     private ShakeDetector shakeDetector;
+    public static String lang = "de";
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
