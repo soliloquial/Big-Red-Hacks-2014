@@ -267,9 +267,11 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         currIndex++;
         if(currList == null || currIndex >= currList.size()) {
             showOverlay = false;
+            setCaption("");
             return;
         } else {
             setCaption(currList.get(currIndex).translation);
+            (new PlaySoundTask(currList.get(currIndex).translation, mCxt)).execute();
         }
         nextOverlayBitmap = ((new DownloadImageTask()).execute(currList.get(currIndex).imageUrl.toString()));
     }

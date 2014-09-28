@@ -18,7 +18,7 @@ import android.widget.Toast;
 import com.example.spencer.brh2014.ShakeDetector.OnShakeListener;
 
 
-public class Main extends Activity implements OnShakeListener,  {
+public class Main extends Activity implements OnShakeListener  {
 
     private Camera mCamera;
     private CameraPreview mPreview;
@@ -40,7 +40,7 @@ public class Main extends Activity implements OnShakeListener,  {
 	// Create a magnetometer sensor
 	magnetometer = new MagnetSensor(this);
 	magnetometer.setOnCardboardTriggerListener(
-            new MagnetSensor.OnCardboardTriggerListener {
+            new MagnetSensor.OnCardboardTriggerListener() {
                 @Override
                 public void onCardboardTrigger() {
                     mPreview.handleClick(Main.this);
