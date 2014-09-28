@@ -3,6 +3,8 @@ package com.example.spencer.brh2014;
 import com.example.spencer.brh2014.ShakeDetector;
 import com.example.spencer.brh2014.ShakeDetector.OnShakeListener;
 
+import com.google.vrtoolkit.cardboard.sensors.MagnetSensor;
+
 import android.app.Activity;
 import android.hardware.Camera;
 import android.os.Bundle;
@@ -16,11 +18,12 @@ import android.widget.Toast;
 import com.example.spencer.brh2014.ShakeDetector.OnShakeListener;
 
 
-public class Main extends Activity implements OnShakeListener {
+public class Main extends Activity implements OnShakeListener,  {
 
     private Camera mCamera;
     private CameraPreview mPreview;
     private ShakeDetector shakeDetector;
+    private MagnetSensor magnetometer;
     public static String lang = "de";
 
     @Override
@@ -33,6 +36,17 @@ public class Main extends Activity implements OnShakeListener {
 
        // Create a shake detector
      	shakeDetector = new ShakeDetector(this);
+
+	// Create a magnetometer sensor
+	magnetometer = new MagnetSensor(this);
+	magnetometer.setOnCardboardTriggerListener(
+            new MagnetSensor.OnCardboardTriggerListener {
+                @Override
+                public void onCardboardTrigger() {
+                    mPreview.handleClick(Main.this);
+                }
+            });
+	magnetometer.start();
 
         // Create our Preview view and set it as the content of our activity.
         mPreview = new CameraPreview(this, mCamera, (TextView) findViewById(R.id.textview), (TextView) findViewById(R.id.textview2));
