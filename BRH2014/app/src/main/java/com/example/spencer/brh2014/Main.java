@@ -29,7 +29,7 @@ public class Main extends Activity implements OnShakeListener {
 
         // Create an instance of Camera
         mCamera = getCameraInstance();
-        
+
        // Create a shake detector
      	shakeDetector = new ShakeDetector(this);
 
@@ -76,7 +76,7 @@ public class Main extends Activity implements OnShakeListener {
         }
         return c; // returns null if camera is unavailable
     }
-    
+
     @Override
 	public void onShake() {
 		Toast.makeText(this, "shake detected", Toast.LENGTH_SHORT).show();
